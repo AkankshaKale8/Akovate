@@ -12,7 +12,7 @@ from ai.impact import campaign_impact
 
 st.set_page_config(
     page_title="Akovate | AI Marketing Collaboration",
-    page_icon="assets/akovate_logo.svg",
+    page_icon="assets/akovate_exact_logo.png",
     layout="wide",
     initial_sidebar_state="expanded",
 )
