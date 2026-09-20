@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 210">
+<rect width="900" height="210" rx="28" fill="#fffdf7"/>
+<g transform="translate(35,35)">
+<path d="M0 80 L55 0 L110 80 L55 145 Z" fill="#2A7A0B"/>
+<path d="M55 0 L125 42 L110 80 L55 145 L70 58 Z" fill="#F47B00"/>
+<path d="M125 42 L160 80 L110 145 L55 145 L110 80 Z" fill="#D71920" opacity=".95"/>
+<path d="M0 80 L55 145 L110 145 L55 80 Z" fill="#F8B708"/>
+</g>
+<text x="225" y="105" font-family="Arial, Helvetica, sans-serif" font-size="76" font-weight="800" fill="#182329">AKOVATE</text>
+<text x="228" y="151" font-family="Arial, Helvetica, sans-serif" font-size="23" font-weight="600" fill="#2A7A0B">AI-POWERED MARKETING COLLABORATION PLATFORM</text>
+</svg>
