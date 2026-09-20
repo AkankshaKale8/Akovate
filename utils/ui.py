@@ -47,7 +47,7 @@ def inject_css():
     )
 
 def logo():
-    path = Path("assets/akovate_logo.svg")
+    path = Path("assets/akovate_exact_logo.png")
     if path.exists():
         st.image(str(path), use_container_width=True)
 
