@@ -4,8 +4,15 @@ from data.sample_data import CAMPAIGNS
 
 DEMO_EMAIL = "demo@akovate.ai"
 DEMO_PASSWORD = "Akovate@123"
-
-
+ROLES = [
+    "Brand",
+    "Creator / Influencer",
+    "Freelancer",
+    "Agency",
+    "Legal Professional",
+    "Sustainability Partner",
+    "Admin",
+]
 def _default_campaigns():
     records = []
 
