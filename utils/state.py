@@ -86,6 +86,7 @@ def init_state():
         "campaign_strategy": None,
         "campaign_caption": None,
         "is_demo": False,
+        "profile_complete": False,
     }
 
     for key, value in defaults.items():
@@ -111,28 +112,55 @@ def load_user_data(user_id, email):
 
         profile_rows = profile_response.data or []
 
-        if profile_rows:
+               if profile_rows:
             profile = profile_rows[0]
 
-            st.session_state["brand_name"] = profile.get("name") or "Akovate User"
-            st.session_state["role"] = profile.get("role") or "Brand"
+            st.session_state["brand_name"] = (
+                profile.get("name")
+                or st.session_state.get("brand_name")
+                or "Akovate User"
+            )
+            st.session_state["role"] = (
+                profile.get("role")
+                or st.session_state.get("role")
+                or "Brand"
+            )
             st.session_state["industry"] = profile.get("industry") or ""
             st.session_state["city"] = profile.get("city") or ""
             st.session_state["audience"] = profile.get("audience") or ""
             st.session_state["values"] = profile.get("values") or []
             st.session_state["profile"] = profile
+            st.session_state["profile_complete"] = True
+
         else:
+            # New authenticated user: do NOT use demo profile defaults.
+            # Preserve the name/role captured during account creation.
+            st.session_state["brand_name"] = (
+                st.session_state.get("brand_name")
+                if st.session_state.get("brand_name")
+                not in ("Akovate Demo Brand", "")
+                else ""
+            )
+            st.session_state["role"] = (
+                st.session_state.get("role")
+                if st.session_state.get("role") in ROLES
+                else "Brand"
+            )
+            st.session_state["industry"] = ""
+            st.session_state["city"] = ""
+            st.session_state["audience"] = ""
+            st.session_state["values"] = []
             st.session_state["profile"] = {
                 "id": user_id,
                 "email": email,
-                "name": "",
-                "role": "Brand",
+                "name": st.session_state["brand_name"],
+                "role": st.session_state["role"],
                 "industry": "",
                 "city": "",
                 "audience": "",
                 "values": [],
             }
-
+            st.session_state["profile_complete"] = False
         campaign_response = (
             supabase.table("campaigns")
             .select("*")
