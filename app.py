@@ -1,6 +1,3 @@
-import streamlit as st
-
-from utils.ui import inject_css, logo, metric_card
 from utils.state import (
     DEMO_EMAIL,
     DEMO_PASSWORD,
@@ -9,6 +6,7 @@ from utils.state import (
     init_state,
     load_user_data,
     logout,
+    save_profile,
     select_campaign,
     selected_campaign,
 )
@@ -138,7 +136,11 @@ def render_login():
                                     user.email or email_clean,
                                 )
 
-                                st.session_state["current_page"] = "🏠 Home"
+                                if st.session_state.get("profile_complete"):
+                                    st.session_state["current_page"] = "🏠 Home"
+                                else:
+                                    st.session_state["current_page"] = "🧭 Onboarding"
+
                                 st.success("Login successful.")
                                 st.rerun()
                             else:
@@ -450,18 +452,42 @@ def render_onboarding():
 
         submitted = st.form_submit_button("Save Profile", type="primary")
 
-    if submitted:
+        if submitted:
         st.session_state.update(
-            brand_name=name or "Akovate Demo Brand",
+            brand_name=name or st.session_state.get("brand_name", ""),
             industry=industry,
             city=city,
             audience=audience,
             values=values,
-            profile={"name": name, "role": role, "industry": industry, "city": city, "audience": audience, "values": values},
+            profile={
+                "id": st.session_state.get("user_id", ""),
+                "email": st.session_state.get("user_email", ""),
+                "name": name,
+                "role": role,
+                "industry": industry,
+                "city": city,
+                "audience": audience,
+                "values": values,
+            },
         )
-        st.success(f"{role} profile saved successfully.")
 
+        # Demo account stays local and keeps its demo experience.
+        if st.session_state.get("is_demo"):
+            st.session_state["profile_complete"] = True
+            st.success(f"{role} profile saved successfully.")
+        else:
+            saved = save_profile()
 
+            if saved:
+                st.session_state["profile_complete"] = True
+                st.success(
+                    f"{role} profile saved successfully to your Akovate account."
+                )
+            else:
+                st.error(
+                    "Your profile could not be saved. "
+                    "Please try again."
+                )
 def render_library():
     st.title("Campaign Library")
     st.caption("Select one campaign to unlock its contextual workspaces and analytics.")
