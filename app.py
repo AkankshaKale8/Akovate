@@ -5,7 +5,9 @@ from utils.state import (
     DEMO_EMAIL,
     DEMO_PASSWORD,
     ROLES,
+    get_supabase,
     init_state,
+    load_user_data,
     logout,
     select_campaign,
     selected_campaign,
@@ -54,6 +56,258 @@ def campaign_required(page):
 
 
 def render_login():
+    st.title("Welcome to Akovate")
+    st.subheader("Sign in to your marketing collaboration workspace")
+    st.caption(
+        "Create your own workspace or use the built-in demo account."
+    )
+
+    login_tab, signup_tab = st.tabs(["🔐 Login", "✨ Create Account"])
+
+    with login_tab:
+        left, right = st.columns([1.25, 1])
+
+        with left:
+            with st.form("login_form"):
+                email = st.text_input(
+                    "Email",
+                    placeholder="you@example.com",
+                    key="login_email",
+                )
+                password = st.text_input(
+                    "Password",
+                    type="password",
+                    placeholder="Your password",
+                    key="login_password",
+                )
+                submitted = st.form_submit_button(
+                    "Login",
+                    type="primary",
+                    use_container_width=True,
+                )
+
+            if submitted:
+                email_clean = email.strip().lower()
+
+                # Keep the existing Akovate demo account.
+                if (
+                    email_clean == DEMO_EMAIL
+                    and password == DEMO_PASSWORD
+                ):
+                    st.session_state["authenticated"] = True
+                    st.session_state["user_email"] = DEMO_EMAIL
+                    st.session_state["user_id"] = "demo-user"
+                    st.session_state["is_demo"] = True
+                    st.session_state["login_error"] = ""
+                    st.session_state["current_page"] = "🏠 Home"
+                    st.success("Demo login successful.")
+                    st.rerun()
+
+                else:
+                    supabase = get_supabase()
+
+                    if supabase is None:
+                        st.error(
+                            "Akovate could not connect to the account service. "
+                            "Please check the app configuration."
+                        )
+                    else:
+                        try:
+                            response = (
+                                supabase.auth.sign_in_with_password(
+                                    {
+                                        "email": email_clean,
+                                        "password": password,
+                                    }
+                                )
+                            )
+
+                            user = response.user
+
+                            if user:
+                                st.session_state["authenticated"] = True
+                                st.session_state["user_email"] = (
+                                    user.email or email_clean
+                                )
+                                st.session_state["user_id"] = user.id
+                                st.session_state["is_demo"] = False
+                                st.session_state["login_error"] = ""
+
+                                load_user_data(
+                                    user.id,
+                                    user.email or email_clean,
+                                )
+
+                                st.session_state["current_page"] = "🏠 Home"
+                                st.success("Login successful.")
+                                st.rerun()
+                            else:
+                                st.error(
+                                    "Login could not be completed."
+                                )
+
+                        except Exception as exc:
+                            message = str(exc)
+
+                            if "Email not confirmed" in message:
+                                st.error(
+                                    "Please verify your email address first, "
+                                    "then log in."
+                                )
+                            else:
+                                st.error(
+                                    "Invalid email or password."
+                                )
+
+        with right:
+            st.info(
+                "**Demo account**\n\n"
+                f"Email: `{DEMO_EMAIL}`\n\n"
+                f"Password: `{DEMO_PASSWORD}`"
+            )
+
+            st.markdown("### What you can explore")
+            st.markdown(
+                "- Personal campaign library\n"
+                "- Explainable creator matching\n"
+                "- ROI, sentiment and viral analytics\n"
+                "- Green score and campaign intelligence"
+            )
+
+    with signup_tab:
+        st.markdown("### Create your Akovate account")
+        st.caption(
+            "Your account will have its own profile and campaign workspace."
+        )
+
+        with st.form("signup_form"):
+            name = st.text_input(
+                "Name / Organisation",
+                placeholder="Your name or organisation",
+            )
+            email = st.text_input(
+                "Email",
+                placeholder="you@example.com",
+                key="signup_email",
+            )
+            password = st.text_input(
+                "Password",
+                type="password",
+                placeholder="Create a password",
+                key="signup_password",
+            )
+            confirm_password = st.text_input(
+                "Confirm password",
+                type="password",
+                placeholder="Repeat your password",
+                key="signup_confirm_password",
+            )
+
+            role = st.selectbox(
+                "Workspace role",
+                ROLES,
+                key="signup_role",
+            )
+
+            create_account = st.form_submit_button(
+                "Create Account",
+                type="primary",
+                use_container_width=True,
+            )
+
+        if create_account:
+            email_clean = email.strip().lower()
+
+            if not name.strip():
+                st.error("Please enter your name or organisation.")
+
+            elif not email_clean:
+                st.error("Please enter your email address.")
+
+            elif len(password) < 6:
+                st.error(
+                    "Password must contain at least 6 characters."
+                )
+
+            elif password != confirm_password:
+                st.error("Passwords do not match.")
+
+            elif email_clean == DEMO_EMAIL:
+                st.error(
+                    "That email is reserved for the Akovate demo account."
+                )
+
+            else:
+                supabase = get_supabase()
+
+                if supabase is None:
+                    st.error(
+                        "Akovate could not connect to the account service."
+                    )
+                else:
+                    try:
+                        response = supabase.auth.sign_up(
+                            {
+                                "email": email_clean,
+                                "password": password,
+                                "options": {
+                                    "data": {
+                                        "name": name.strip(),
+                                        "role": role,
+                                    }
+                                },
+                            }
+                        )
+
+                        if response.user:
+                            user = response.user
+
+                            # If Supabase immediately returns a session,
+                            # log the user in. Otherwise ask them to verify
+                            # their email first.
+                            if response.session:
+                                st.session_state["authenticated"] = True
+                                st.session_state["user_email"] = (
+                                    user.email or email_clean
+                                )
+                                st.session_state["user_id"] = user.id
+                                st.session_state["is_demo"] = False
+                                st.session_state["role"] = role
+                                st.session_state["brand_name"] = (
+                                    name.strip()
+                                )
+
+                                load_user_data(
+                                    user.id,
+                                    user.email or email_clean,
+                                )
+
+                                st.session_state["current_page"] = (
+                                    "🧭 Onboarding"
+                                )
+                                st.success(
+                                    "Account created successfully."
+                                )
+                                st.rerun()
+                            else:
+                                st.success(
+                                    "Account created. "
+                                    "Please check your email and verify "
+                                    "your account before logging in."
+                                )
+
+                    except Exception as exc:
+                        message = str(exc)
+
+                        if "already registered" in message.lower():
+                            st.error(
+                                "An account with this email already exists."
+                            )
+                        else:
+                            st.error(
+                                "Account creation failed. "
+                                "Please check your details and try again."
+                            )
     st.title("Welcome to Akovate")
     st.subheader("Sign in to your marketing collaboration workspace")
     st.caption("Demo access is built into this prototype; no external API key is required.")
