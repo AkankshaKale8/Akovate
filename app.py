@@ -451,26 +451,24 @@ def render_onboarding():
             values = st.multiselect("Admin permissions", ["Campaigns", "Users", "Analytics", "Partners", "Settings"], default=["Campaigns", "Analytics"])
 
         submitted = st.form_submit_button("Save Profile", type="primary")
-
         if submitted:
             st.session_state.update(
-            brand_name=name or st.session_state.get("brand_name", ""),
-            industry=industry,
-            city=city,
-            audience=audience,
-            values=values,
-            profile={
-                "id": st.session_state.get("user_id", ""),
-                "email": st.session_state.get("user_email", ""),
-                "name": name,
-                "role": role,
-                "industry": industry,
-                "city": city,
-                "audience": audience,
-                "values": values,
-            },
-        )
-
+                brand_name=name or st.session_state.get("brand_name", ""),
+                industry=industry,
+                city=city,
+                audience=audience,
+                values=values,
+                profile={
+                    "id": st.session_state.get("user_id", ""),
+                    "email": st.session_state.get("user_email", ""),
+                    "name": name,
+                    "role": role,
+                    "industry": industry,
+                    "city": city,
+                    "audience": audience,
+                    "values": values,
+                },
+            )
         # Demo account stays local and keeps its demo experience.
         if st.session_state.get("is_demo"):
             st.session_state["profile_complete"] = True
