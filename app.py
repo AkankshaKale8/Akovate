@@ -743,11 +743,7 @@ def render_settings():
 render_sidebar()
 
 if not st.session_state.get("authenticated"):
-    page = "🔐 Login" if st.session_state.get("current_page") == "🔐 Login" else st.session_state.get("current_page", "🏠 Home")
-    if page != "🔐 Login":
-        render_login()
-    else:
-        render_login()
+    render_login()
 else:
     page = st.session_state.get("current_page", "🏠 Home")
     if campaign_required(page):
