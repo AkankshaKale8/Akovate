@@ -453,7 +453,7 @@ def render_onboarding():
         submitted = st.form_submit_button("Save Profile", type="primary")
 
         if submitted:
-        st.session_state.update(
+            st.session_state.update(
             brand_name=name or st.session_state.get("brand_name", ""),
             industry=industry,
             city=city,
