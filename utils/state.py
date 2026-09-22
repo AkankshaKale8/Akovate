@@ -112,7 +112,7 @@ def load_user_data(user_id, email):
 
         profile_rows = profile_response.data or []
 
-               if profile_rows:
+        if profile_rows:
             profile = profile_rows[0]
 
             st.session_state["brand_name"] = (
