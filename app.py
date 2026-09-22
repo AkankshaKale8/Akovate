@@ -308,32 +308,7 @@ def render_login():
                                 "Account creation failed. "
                                 "Please check your details and try again."
                             )
-    st.title("Welcome to Akovate")
-    st.subheader("Sign in to your marketing collaboration workspace")
-    st.caption("Demo access is built into this prototype; no external API key is required.")
-    left, right = st.columns([1.25, 1])
-    with left:
-        with st.form("login_form"):
-            email = st.text_input("Email", placeholder="demo@akovate.ai")
-            password = st.text_input("Password", type="password", placeholder="Akovate@123")
-            submitted = st.form_submit_button("Login", type="primary", use_container_width=True)
-        if submitted:
-            if email.strip().lower() == DEMO_EMAIL and password == DEMO_PASSWORD:
-                st.session_state["authenticated"] = True
-                st.session_state["user_email"] = email.strip().lower()
-                st.session_state["login_error"] = ""
-                st.session_state["current_page"] = "🏠 Home"
-                st.success("Login successful.")
-                st.rerun()
-            st.session_state["login_error"] = "Invalid demo credentials."
-        if st.session_state.get("login_error"):
-            st.error(st.session_state["login_error"])
-    with right:
-        st.info("**Demo credentials**\n\nEmail: `demo@akovate.ai`\n\nPassword: `Akovate@123`")
-        st.markdown("### What you can explore")
-        st.markdown("- Campaign Library and project selection\n- Explainable creator matching\n- ROI, sentiment and viral analytics\n- Green score and campaign intelligence")
-
-
+   
 def render_sidebar():
     with st.sidebar:
         logo()
